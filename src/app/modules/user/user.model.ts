@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 
-import { TUser } from './user.interface';
+import { TUser, UserModel } from './user.interface';
 import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 import { USER_ROLE } from './user.constant';
 
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     name: {
       type: String,
@@ -29,7 +29,7 @@ const userSchema = new Schema<TUser>(
     role: {
       type: String,
       enum: Object.keys(USER_ROLE),
-    
+      default: USER_ROLE.user,
     },
     address: {
       type: String,
@@ -54,4 +54,15 @@ userSchema.post('save', function (doc, next) {
   next();
 });
 
-export const User = model<TUser>('User', userSchema);
+
+userSchema.statics.isUserExists = async function (email: string) {
+  return await User.findOne({ email: email });
+};
+
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+export const User = model<TUser, UserModel>('User', userSchema);

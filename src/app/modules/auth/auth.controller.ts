@@ -29,31 +29,31 @@ const signupUser = catchAsync(async (req, res) => {
 
 
 const loginUser = catchAsync(async (req, res) => {
-//   const result = await AuthServices.loginService(req.body);
-//   const { refreshToken, accessToken } = result;
+  const result = await AuthServices.loginService(req.body);
+  const { refreshToken, accessToken, userData } = result;
 
-//   res.cookie('refreshToken', refreshToken, {
-//     secure: config.NODE_ENV === 'production',
-//     httpOnly: true,
-//   });
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+  });
 
-//   if (!result) {
-//     sendLoginResponse(res, {
-//       success: false,
-//       statusCode: httpStatus.NOT_FOUND,
-//       message: 'No Data Found!',
-//       token: '',
-//       data: result,
-//     });
-//   }
+  if (!result) {
+    sendLoginResponse(res, {
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: 'No Data Found!',
+      token: '',
+      data: '',
+    });
+  }
 
-//   sendLoginResponse(res, {
-//     success: true,
-//     statusCode: httpStatus.OK,
-//     message: 'User logged in successfully',
-//     token: accessToken,
-//     data: result,
-//   });
+  sendLoginResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'User logged in successfully',
+    token: accessToken,
+    data: userData,
+  });
 });
 
 

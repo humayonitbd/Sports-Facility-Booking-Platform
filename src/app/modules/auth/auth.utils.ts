@@ -23,8 +23,9 @@ type TLoginResponse<T> = {
 export const sendLoginResponse = <T>(res: Response, data: TLoginResponse<T>) => {
   res.status(data.statusCode).json({
     success: data.success,
+    statusCode: data.statusCode,
     message: data.message,
-    token:data.token,
+    token: data.token,
     data: data.data,
   });
 };
