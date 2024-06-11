@@ -20,7 +20,7 @@ const userSchema = new Schema<TUser>(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      select: false, 
+      select: 0,
     },
     phone: {
       type: String,
@@ -28,8 +28,8 @@ const userSchema = new Schema<TUser>(
     },
     role: {
       type: String,
-      required: [true, 'Role is required'],
       enum: Object.keys(USER_ROLE),
+    
     },
     address: {
       type: String,
@@ -48,10 +48,10 @@ userSchema.pre('save', async function (next) {
 
   next();
 });
-// userSchema.post('save', function (doc, next) {
-//   doc.password = '';
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
 
-//   next();
-// });
+  next();
+});
 
 export const User = model<TUser>('User', userSchema);

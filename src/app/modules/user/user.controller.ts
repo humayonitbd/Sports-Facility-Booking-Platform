@@ -15,8 +15,6 @@ const createStudent = catchAsync(async (req, res) => {
       message: 'No Data Found!',
       data: [],
     });
-  
-
   }
   // console.log(result)
 
