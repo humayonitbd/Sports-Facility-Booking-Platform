@@ -22,7 +22,7 @@ export const AuthValidation = (...requiredRoles: (keyof typeof USER_ROLE)[]) => 
     );
 
     const { role, email, userId } = verfiedToken as JwtPayload;
-    console.log('userId', userId);
+    console.log('userId', userId,"role",role,'email',email);
 
     const userExist = await User.isUserExistsByEmail( email );
 

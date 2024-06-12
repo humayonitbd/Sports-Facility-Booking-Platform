@@ -6,7 +6,7 @@ import { BOOKING_STATUS } from "./booking.constant";
 const bookingSchema = new Schema<TBooking>(
   {
     date: {
-      type: Date,
+      type: String,
       required: [true, 'Date is required'],
     },
     startTime: {

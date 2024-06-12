@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { BOOKING_STATUS } from "./booking.constant";
 
 export type TBooking = {
-  date: Date;
+  date: string;
   startTime: string;
   endTime: string;
   user: Types.ObjectId;

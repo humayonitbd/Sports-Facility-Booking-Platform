@@ -10,16 +10,28 @@ import { USER_ROLE } from '../user/user.constant';
 const router = express.Router();
 
 router.post(
-  '',
+  '/bookings',
   AuthValidation(USER_ROLE.user),
   validateRequest(BookingValidation.createBookingSchema),
   BookingControllers.createBooking,
 );
-router.get('', AuthValidation(USER_ROLE.admin), BookingControllers.getAllBooking);
-// router.get(
-//   '/user',
-//   BookingControllers.updateFacility,
-// );
-router.delete('/:id', BookingControllers.deleteBooking);
+router.get(
+  '/bookings/user',
+  AuthValidation(USER_ROLE.user),
+  BookingControllers.userGetBooking,
+);
+
+router.get(
+  '/bookings',
+  AuthValidation(USER_ROLE.admin),
+  BookingControllers.getAllBooking,
+);
+router.delete(
+  '/bookings/:id',
+  AuthValidation(USER_ROLE.user),
+  BookingControllers.deleteBooking,
+);
+
+router.get('/check-availability', BookingControllers.AvailabilityBooking);
 
 export const BookingRoutes = router;
