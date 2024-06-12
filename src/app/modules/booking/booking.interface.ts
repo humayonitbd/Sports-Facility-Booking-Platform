@@ -10,3 +10,9 @@ export type TBooking = {
   payableAmount?: number;
   isBooked: keyof typeof BOOKING_STATUS;
 };
+
+export type TSchedule = {
+  date: string;
+  startTime: string;
+  endTime: string;
+};

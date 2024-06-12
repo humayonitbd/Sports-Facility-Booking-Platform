@@ -9,7 +9,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Facility } from '../facility/facility.model';
 import { User } from '../user/user.model';
 import { USER_ROLE } from '../user/user.constant';
-import { convertToISODateString, formatDate, validateDateFormat } from './booking.utils';
+import { convertToISODateString, dateTimeConflict, formatDate, validateDateFormat } from './booking.utils';
 const { ObjectId } = require('mongoose').Types;
 
 const createBookingService = async (
@@ -17,7 +17,7 @@ const createBookingService = async (
   payload: TBooking,
 ) => {
   const bodyData = payload;
-  const { facility, startTime, endTime } = bodyData;
+  const { facility, startTime, endTime,date } = bodyData;
   const { email, role, userId } = userData;
   const startDateTime = new Date(`1980-01-01T${startTime}:00`).getTime();
   const endDateTime = new Date(`1980-01-01T${endTime}:00`).getTime();
@@ -45,6 +45,26 @@ const createBookingService = async (
   if (usersData?.role !== role) {
     throw new AppError(httpStatus.NOT_FOUND, 'You are not User!!');
   }
+
+const assignedSchedules = await Booking.find({
+  user: userId,
+  date: date,
+}).select('date startTime endTime');
+
+const newSchedules = {
+  startTime,
+  endTime,
+  date,
+};
+
+if (dateTimeConflict(assignedSchedules, newSchedules)) {
+  throw new AppError(
+    httpStatus.CONFLICT,
+    `This facility is not available at that time ! Choose other time or day`,
+  );
+}
+
+
   // Calculate the duration in hours
   const durationInMilliseconds = endDateTime - startDateTime;
   const durationInHours = durationInMilliseconds / (1000 * 60 * 60);
