@@ -3,3 +3,6 @@ export const BOOKING_STATUS = {
   unconfirmed: 'unconfirmed',
   canceled: 'canceled',
 } as const;
+
+
+export const bookingSearchableFields = ['date'];

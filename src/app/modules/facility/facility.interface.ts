@@ -1,3 +1,4 @@
+import { Model } from "mongoose";
 
 export type TFacility = {
   name: string;
@@ -6,3 +7,7 @@ export type TFacility = {
   location: string;
   isDeleted: boolean;
 };
+
+export interface FacilityModel extends Model<TFacility> {
+  isFacilityExistsByid(id: string): Promise<TFacility>;
+}

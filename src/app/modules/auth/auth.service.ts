@@ -10,7 +10,7 @@ import { createToken } from './auth.utils';
 
 const signupService = async (payload: TUser): Promise<any> => {
   //user existence check
-  const user = await User.isUserExists(payload?.email);
+  const user = await User.isUserExistsByEmail(payload?.email);
 
   if (user) {
     throw new Error('User already exists');
@@ -32,11 +32,12 @@ const loginService = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched !!');
   }
 
-  const userData = await User.isUserExists(payload?.email);
-
+  const userData = await User.isUserExistsByEmail(payload?.email);
+ 
   const jwtPayload = {
     email: user?.email || "",
     role: user?.role || "",
+    userId:user?._id,
   };
   // create access token and send client
   const accessToken = createToken(
@@ -51,6 +52,7 @@ const loginService = async (payload: TLoginUser) => {
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
+
 
  
 

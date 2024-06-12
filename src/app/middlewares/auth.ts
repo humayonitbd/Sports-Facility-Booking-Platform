@@ -21,16 +21,22 @@ export const AuthValidation = (...requiredRoles: (keyof typeof USER_ROLE)[]) => 
       config.jwt_access_secret as string,
     );
 
-    const { role, email } = verfiedToken as JwtPayload;
+    const { role, email, userId } = verfiedToken as JwtPayload;
+    console.log('userId', userId);
 
-    const user = await User.isUserExists( email );
+    const userExist = await User.isUserExistsByEmail( email );
 
-    if (!user) {
+    if (!userExist) {
       throw new AppError(401, 'User not found');
     }
 
+      const userExistById = await User.isUserExistsByid(userId);
+      if (!userExistById) {
+        throw new AppError(401, 'User not found');
+      }
 
-    if (user?.role !== role) {
+   
+    if (userExist?.role !== role) {
       throw new AppError(401, 'You are not authorized to access this route');
     }
 
@@ -40,6 +46,7 @@ export const AuthValidation = (...requiredRoles: (keyof typeof USER_ROLE)[]) => 
       throw new AppError(401, 'You are not authorized to access this route');
     }
 
+    req.user = verfiedToken as JwtPayload;
     next();
   });
 };
