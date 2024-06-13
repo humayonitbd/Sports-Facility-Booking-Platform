@@ -14,7 +14,6 @@ export const AuthValidation = (...requiredRoles: (keyof typeof USER_ROLE)[]) => 
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // throw new AppError(401, 'You are not authorized to access this route');
       return res.status(401).json(AuthError());
     }
     const accessToken = authHeader.split(' ')[1];
@@ -29,23 +28,22 @@ export const AuthValidation = (...requiredRoles: (keyof typeof USER_ROLE)[]) => 
     const userExist = await User.isUserExistsByEmail( email );
 
     if (!userExist) {
-      throw new AppError(401, 'You are not authorized to access this route');
+      return res.status(401).json(AuthError());
     }
 
       const userExistById = await User.isUserExistsByid(userId);
       if (!userExistById) {
-        throw new AppError(401, 'You are not authorized to access this route');
+        return res.status(401).json(AuthError());
       }
 
-   
     if (userExist?.role !== role) {
-      throw new AppError(401, 'You are not authorized to access this route');
+      return res.status(401).json(AuthError());
     }
 
 
 
     if (!requiredRoles.includes(role)) {
-      throw new AppError(401, 'You are not authorized to access this route');
+      return res.status(401).json(AuthError());
     }
 
     req.user = verfiedToken as JwtPayload;

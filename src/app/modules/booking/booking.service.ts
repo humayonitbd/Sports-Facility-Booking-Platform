@@ -145,28 +145,27 @@ const deleteBookingService = async (userInfo:JwtPayload,id: string) => {
 
 
 const availabilityBookingService = async (dateData: string) => {
-  if (!validateDateFormat(dateData)) {
-    throw new Error('Invalid date format. Date must be in DD-MM-YYYY format.');
-  }
+const currentDate = new Date();
+const updateDate = formatDate(currentDate);
+const queryDate = dateData ? dateData : updateDate;
 
-  const currentDate = new Date();
-  const updateDate = formatDate(currentDate);
-  const dateInfo = convertToISODateString(dateData) || updateDate;
+if (!validateDateFormat(queryDate)) {
+  throw new Error('Invalid date format. Date must be in DD-MM-YYYY format.');
+}
 
-  console.log('convert', dateInfo);
+  const dateInfo = convertToISODateString(queryDate);
   const availableSlotsDate = await Booking.find({ date: dateInfo });
-    console.log("availableSlots",availableSlotsDate);
   const bookedTimeSlots = availableSlotsDate.map((data) => ({
     startTime: data.startTime,
     endTime: data.endTime,
   }));
 
-  console.log('bookedTimeSlots', bookedTimeSlots);
-  // Define the range of time slots from "01:00" to "24:00"
+
+  // initialtime here
   const availableStartTime = '00:00';
   const availableEndTime = '23:59';
 
-  // Initialize available time slots with the full range
+  // Initialize available time slots here 
   let availableSlots: { startTime: string; endTime: string }[] = [
     { startTime: availableStartTime, endTime: availableEndTime },
   ];
@@ -185,13 +184,11 @@ const availabilityBookingService = async (dateData: string) => {
         const slotEndMinutes = timeToMinutes(slot.endTime);
         const bookingStartMinutes = timeToMinutes(booking.startTime);
         const bookingEndMinutes = timeToMinutes(booking.endTime);
-
         // Check if booking overlaps with slot
         if (
           bookingStartMinutes < slotEndMinutes &&
           bookingEndMinutes > slotStartMinutes
         ) {
-          // Split the slot into two parts if it overlaps with the booking
           if (slotStartMinutes < bookingStartMinutes) {
             result.push({
               startTime: slot.startTime,
@@ -202,15 +199,14 @@ const availabilityBookingService = async (dateData: string) => {
             result.push({ startTime: booking.endTime, endTime: slot.endTime });
           }
         } else {
-          result.push(slot); // Keep the slot if it doesn't overlap
+          result.push(slot);
         }
         return result;
       },
       [] as { startTime: string; endTime: string }[],
-    ); // Specify the type explicitly
+    ); 
   }
 
-  // console.log('dateTimeString', dateTimeString);
   return availableSlots;
 };
 
