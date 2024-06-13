@@ -1,4 +1,3 @@
-
 import httpStatus from 'http-status';
 import config from '../../config';
 import catchAsync from '../../utils/catchAsync';
@@ -6,10 +5,9 @@ import sendResponse from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
 import { sendLoginResponse } from './auth.utils';
 
-
 const signupUser = catchAsync(async (req, res) => {
   const result = await AuthServices.signupService(req.body);
-  
+
   if (!result) {
     sendResponse(res, {
       success: false,
@@ -26,7 +24,6 @@ const signupUser = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginService(req.body);
@@ -55,7 +52,6 @@ const loginUser = catchAsync(async (req, res) => {
     data: userData,
   });
 });
-
 
 export const authControllers = {
   signupUser,

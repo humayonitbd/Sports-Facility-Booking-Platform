@@ -1,12 +1,11 @@
 import { isValid, parse } from 'date-fns';
 import { TSchedule } from './booking.interface';
 
-// validdate check here 
-export const validateDateFormat = (dateString:any) => {
+// validdate check here
+export const validateDateFormat = (dateString: string) => {
   const parsedDate = parse(dateString, 'yyyy-MM-dd', new Date());
   return isValid(parsedDate);
 };
-
 
 export const formatDate = (dateTime: Date): string => {
   const date = new Date(dateTime);
@@ -17,8 +16,6 @@ export const formatDate = (dateTime: Date): string => {
   const formattedDate = `${year}-${month}-${day}`;
   return formattedDate;
 };
-
-
 
 export const dateTimeConflict = (
   assignedSchedules: TSchedule[],

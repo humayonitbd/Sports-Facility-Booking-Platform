@@ -12,16 +12,18 @@ export const createToken = (
   });
 };
 
-
 type TLoginResponse<T> = {
   statusCode: number;
   success: boolean;
   message?: string;
-  token:string;
+  token: string;
   data: T;
 };
 
-export const sendLoginResponse = <T>(res: Response, data: TLoginResponse<T>) => {
+export const sendLoginResponse = <T>(
+  res: Response,
+  data: TLoginResponse<T>,
+) => {
   res.status(data.statusCode).json({
     success: data.success,
     statusCode: data.statusCode,
@@ -30,5 +32,3 @@ export const sendLoginResponse = <T>(res: Response, data: TLoginResponse<T>) => 
     data: data.data,
   });
 };
-
-

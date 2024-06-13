@@ -4,5 +4,4 @@ export const BOOKING_STATUS = {
   canceled: 'canceled',
 } as const;
 
-
 export const bookingSearchableFields = ['date'];

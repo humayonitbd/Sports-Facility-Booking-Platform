@@ -40,7 +40,6 @@
 //   createBookingSchema,
 // };
 
-
 import { z } from 'zod';
 import { BOOKING_STATUS } from './booking.constant';
 
@@ -90,7 +89,6 @@ export const createBookingSchema = z.object({
       },
     ),
 });
-
 
 export const BookingValidation = {
   createBookingSchema,

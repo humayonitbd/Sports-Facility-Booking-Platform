@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TUser } from '../user/user.interface';
 import { User } from '../user/user.model';
@@ -31,8 +30,10 @@ const signupService = async (payload: TUser): Promise<any> => {
 };
 
 const loginService = async (payload: TLoginUser) => {
-  const user = await User.findOne( {email: payload?.email} ).select('+password');
-  
+  const user = await User.findOne({ email: payload?.email }).select(
+    '+password',
+  );
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!!');
   }
@@ -42,7 +43,7 @@ const loginService = async (payload: TLoginUser) => {
   }
 
   const userData = await User.isUserExistsByEmail(payload?.email);
- 
+
   const jwtPayload = {
     email: user?.email ?? '',
     role: user?.role ?? '',
@@ -61,9 +62,6 @@ const loginService = async (payload: TLoginUser) => {
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
-
-
- 
 
   return {
     accessToken,

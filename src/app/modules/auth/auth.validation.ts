@@ -7,8 +7,6 @@ export const loginSchema = z.object({
   }),
 });
 
-
 export const AuthValidationSchema = {
   loginSchema,
 };
-

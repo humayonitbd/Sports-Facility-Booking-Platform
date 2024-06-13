@@ -1,5 +1,5 @@
-import { Schema, model } from "mongoose";
-import { FacilityModel, TFacility } from "./facility.interface";
+import { Schema, model } from 'mongoose';
+import { FacilityModel, TFacility } from './facility.interface';
 
 const facilitySchema = new Schema<TFacility, FacilityModel>(
   {
@@ -33,4 +33,7 @@ facilitySchema.statics.isFacilityExistsByid = async function (id: string) {
   return await Facility.findById(id);
 };
 
-export const Facility = model<TFacility, FacilityModel>('Facility', facilitySchema);
+export const Facility = model<TFacility, FacilityModel>(
+  'Facility',
+  facilitySchema,
+);

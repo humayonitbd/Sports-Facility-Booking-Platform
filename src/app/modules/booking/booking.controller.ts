@@ -1,13 +1,9 @@
-
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { BookingServices } from './booking.service';
 
-
-
 const createBooking = catchAsync(async (req, res) => {
-
   const result = await BookingServices.createBookingService(req.user, req.body);
 
   if (!result) {
@@ -48,7 +44,6 @@ const getAllBooking = catchAsync(async (req, res) => {
 });
 
 const userGetBooking = catchAsync(async (req, res) => {
-
   const result = await BookingServices.userGetBookingService(req.user);
 
   if (!result) {
@@ -70,7 +65,7 @@ const userGetBooking = catchAsync(async (req, res) => {
 
 const deleteBooking = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await BookingServices.deleteBookingService(req.user,id);
+  const result = await BookingServices.deleteBookingService(req.user, id);
 
   if (!result) {
     sendResponse(res, {
@@ -90,7 +85,7 @@ const deleteBooking = catchAsync(async (req, res) => {
 });
 
 const AvailabilityBooking = catchAsync(async (req, res) => {
-  const  date  = req.query.date as string;
+  const date = req.query.date as string;
   const result = await BookingServices.availabilityBookingService(date);
 
   if (!result) {

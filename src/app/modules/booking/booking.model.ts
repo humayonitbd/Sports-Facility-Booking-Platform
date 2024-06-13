@@ -1,7 +1,6 @@
-import { Schema, model } from "mongoose";
-import { TBooking } from "./booking.interface";
-import { BOOKING_STATUS } from "./booking.constant";
-
+import { Schema, model } from 'mongoose';
+import { TBooking } from './booking.interface';
+import { BOOKING_STATUS } from './booking.constant';
 
 const bookingSchema = new Schema<TBooking>(
   {

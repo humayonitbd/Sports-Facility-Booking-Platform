@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 import { USER_ROLE } from './user.constant';
 
@@ -19,5 +18,4 @@ export const createUserSchema = z.object({
 
 export const UserValidation = {
   createUserSchema,
-
 };

@@ -23,7 +23,7 @@ const userSchema = new Schema<TUser, UserModel>(
       select: 0,
     },
     phone: {
-      type: String ,
+      type: String,
       required: [true, 'Phone is required'],
       unique: true,
     },
@@ -45,7 +45,10 @@ const userSchema = new Schema<TUser, UserModel>(
 userSchema.pre('save', async function (next) {
   const user = this;
 
-  user.password = await bcrypt.hash(user.password, Number(config.bcrypt_solt_rounds));
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_solt_rounds),
+  );
 
   next();
 });
@@ -54,7 +57,6 @@ userSchema.post('save', function (doc, next) {
 
   next();
 });
-
 
 userSchema.statics.isUserExistsByEmail = async function (email: string) {
   return await User.findOne({ email: email });
@@ -67,7 +69,6 @@ userSchema.statics.isUserExistsByid = async function (id: string) {
 userSchema.statics.isUserExistsByNumber = async function (phone: string) {
   return await User.findOne({ phone });
 };
-
 
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword: string,

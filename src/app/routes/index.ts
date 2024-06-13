@@ -3,7 +3,6 @@ import { AuthRoutes } from '../modules/auth/auth.route';
 import { FacilityRoutes } from '../modules/facility/facility.route';
 import { BookingRoutes } from '../modules/booking/booking.route';
 
-
 const router = Router();
 
 const moduleRoutes = [

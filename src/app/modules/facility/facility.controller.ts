@@ -1,10 +1,7 @@
-
 import httpStatus from 'http-status';
-import config from '../../config';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { FacilityServices } from './facility.service';
-
 
 const createFacility = catchAsync(async (req, res) => {
   const result = await FacilityServices.createFacilityService(req.body);
@@ -47,9 +44,9 @@ const getAllFacility = catchAsync(async (req, res) => {
 });
 
 const updateFacility = catchAsync(async (req, res) => {
-    const {id} = req.params;
-  const result = await FacilityServices.updateFacilityService(id,req.body);
-  
+  const { id } = req.params;
+  const result = await FacilityServices.updateFacilityService(id, req.body);
+
   if (!result) {
     sendResponse(res, {
       success: false,
@@ -68,9 +65,9 @@ const updateFacility = catchAsync(async (req, res) => {
 });
 
 const deleteFacility = catchAsync(async (req, res) => {
-    const {id} = req.params;
+  const { id } = req.params;
   const result = await FacilityServices.deleteFacilityService(id);
-  
+
   if (!result) {
     sendResponse(res, {
       success: false,

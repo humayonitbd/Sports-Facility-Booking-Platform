@@ -1,4 +1,3 @@
-
 import httpStatus from 'http-status';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { AppError } from '../../error/AppError';
@@ -9,15 +8,17 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Facility } from '../facility/facility.model';
 import { User } from '../user/user.model';
 import { USER_ROLE } from '../user/user.constant';
-import { dateTimeConflict, formatDate, validateDateFormat } from './booking.utils';
-const { ObjectId } = require('mongoose').Types;
-// import moment from 'moment';
+import {
+  dateTimeConflict,
+  formatDate,
+  validateDateFormat,
+} from './booking.utils';
+import { Types } from 'mongoose';
 
 const createBookingService = async (
   userData: JwtPayload,
   payload: TBooking,
 ) => {
-  
   const { facility, startTime, endTime, date } = payload;
   const { email, role, userId } = userData;
   const startDateTime = new Date(`1980-01-01T${startTime}:00`).getTime();
@@ -49,23 +50,22 @@ const createBookingService = async (
     throw new AppError(httpStatus.NOT_FOUND, 'You are not User!!');
   }
 
-const assignedSchedules = await Booking.find({
-  date: date,
-}).select('date startTime endTime');
+  const assignedSchedules = await Booking.find({
+    date: date,
+  }).select('date startTime endTime');
 
-const newSchedules = {
-  startTime,
-  endTime,
-  date,
-};
+  const newSchedules = {
+    startTime,
+    endTime,
+    date,
+  };
 
-if (dateTimeConflict(assignedSchedules, newSchedules)) {
-  throw new AppError(
-    httpStatus.CONFLICT,
-    `This facility is not available at that time ! Choose other time or day`,
-  );
-}
-
+  if (dateTimeConflict(assignedSchedules, newSchedules)) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `This facility is not available at that time ! Choose other time or day`,
+    );
+  }
 
   // Calculate the duration in hours
   const durationInMilliseconds = endDateTime - startDateTime;
@@ -74,14 +74,13 @@ if (dateTimeConflict(assignedSchedules, newSchedules)) {
   // Calculate the payable amount
   const payableAmount = durationInHours * Number(facilityData.pricePerHour);
 
-  
   const result = await Booking.create({
     ...payload,
     user: userId,
     payableAmount: payableAmount,
     isBooked: BOOKING_STATUS.confirmed,
   });
-  
+
   return result;
 };
 
@@ -96,64 +95,62 @@ const getAllBookingService = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const result = await facultyQuery.modelQuery ;
+  const result = await facultyQuery.modelQuery;
   return result;
 };
 
-const userGetBookingService = async (userInfo:JwtPayload) => {
-    console.log(userInfo.role,'role', userInfo.email)
-    const user = await User.isUserExistsByEmail(userInfo?.email);
-    if(!user){
-         throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
-    }
+const userGetBookingService = async (userInfo: JwtPayload) => {
+  const user = await User.isUserExistsByEmail(userInfo?.email);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
+  }
 
-    if(user?.role !== USER_ROLE?.user){
-         throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
-    }
+  if (user?.role !== USER_ROLE?.user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
+  }
 
   const result = await Booking.find({ user: userInfo?.userId }).populate(
     'facility',
   );
-  
+
   return result;
 };
 
-const deleteBookingService = async (userInfo:JwtPayload,id: string) => {
-    const booked = await Booking.findById(id);
-    if(!booked){
-         throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
-    }
+const deleteBookingService = async (userInfo: JwtPayload, id: string) => {
+  const booked = await Booking.findById(id);
+  if (!booked) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
+  }
 
-    if(booked?.isBooked === BOOKING_STATUS.canceled){
-         throw new AppError(httpStatus.NOT_FOUND, 'Booking is already deleted!!');
-    }
+  if (booked?.isBooked === BOOKING_STATUS.canceled) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking is already deleted!!');
+  }
 
-    const userId = new ObjectId(userInfo.userId);
-    const bookedUserId = new ObjectId(booked.user);
+  const userId = new Types.ObjectId(userInfo.userId);
+  const bookedUserId = new Types.ObjectId(booked.user);
 
-    if (!userId.equals(bookedUserId)) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!!');
-    }
-    
-      const deletedBooking = await Booking.findByIdAndUpdate(
-        id,
-        { isBooked: BOOKING_STATUS.canceled },
-        { new: true },
-      ).populate('facility');
+  if (!userId.equals(bookedUserId)) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!!');
+  }
+
+  const deletedBooking = await Booking.findByIdAndUpdate(
+    id,
+    { isBooked: BOOKING_STATUS.canceled },
+    { new: true },
+  ).populate('facility');
   if (!deletedBooking) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted Booking!!');
   }
   return deletedBooking;
 };
 
-
 const availabilityBookingService = async (dateData: string) => {
-const currentDate = new Date();
-const updateDate = formatDate(currentDate);
-const queryDate = dateData ? dateData : updateDate;
-if (!validateDateFormat(queryDate)) {
-  throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
-}
+  const currentDate = new Date();
+  const updateDate = formatDate(currentDate);
+  const queryDate = dateData ? dateData : updateDate;
+  if (!validateDateFormat(queryDate)) {
+    throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
+  }
 
   const availableSlotsDate = await Booking.find({ date: queryDate });
   const bookedTimeSlots = availableSlotsDate.map((data) => ({
@@ -165,16 +162,16 @@ if (!validateDateFormat(queryDate)) {
   let availableStartTime = '00:00';
   let availableEndTime = '24:00';
 
-  if (bookedTimeSlots.length === 0){
+  if (bookedTimeSlots.length === 0) {
     availableStartTime = '00:00';
-     availableEndTime = '23:59';
+    availableEndTime = '23:59';
   }
 
   console.log('bookedTimeSlots', bookedTimeSlots);
-    // Initialize available time slots here
-    let availableSlots: { startTime: string; endTime: string }[] = [
-      { startTime: availableStartTime, endTime: availableEndTime },
-    ];
+  // Initialize available time slots here
+  let availableSlots: { startTime: string; endTime: string }[] = [
+    { startTime: availableStartTime, endTime: availableEndTime },
+  ];
 
   // Function to convert time string to minutes
   const timeToMinutes = (time: string): number => {
@@ -210,13 +207,11 @@ if (!validateDateFormat(queryDate)) {
         return result;
       },
       [] as { startTime: string; endTime: string }[],
-    ); 
+    );
   }
 
   return availableSlots;
-
 };
-
 
 export const BookingServices = {
   createBookingService,
