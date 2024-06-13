@@ -23,8 +23,9 @@ const userSchema = new Schema<TUser, UserModel>(
       select: 0,
     },
     phone: {
-      type: String,
+      type: String ,
       required: [true, 'Phone is required'],
+      unique: true,
     },
     role: {
       type: String,
@@ -61,6 +62,10 @@ userSchema.statics.isUserExistsByEmail = async function (email: string) {
 
 userSchema.statics.isUserExistsByid = async function (id: string) {
   return await User.findById(id);
+};
+
+userSchema.statics.isUserExistsByNumber = async function (phone: string) {
+  return await User.findOne({ phone });
 };
 
 

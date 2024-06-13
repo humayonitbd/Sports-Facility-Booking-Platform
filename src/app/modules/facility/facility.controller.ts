@@ -52,8 +52,8 @@ const updateFacility = catchAsync(async (req, res) => {
   
   if (!result) {
     sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
       message: 'No Data Found!',
       data: [],
     });
@@ -73,8 +73,8 @@ const deleteFacility = catchAsync(async (req, res) => {
   
   if (!result) {
     sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
       message: 'No Data Found!',
       data: [],
     });

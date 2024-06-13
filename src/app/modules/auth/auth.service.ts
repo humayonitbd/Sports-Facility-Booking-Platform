@@ -15,6 +15,15 @@ const signupService = async (payload: TUser): Promise<any> => {
   if (user) {
     throw new Error('User already exists');
   }
+
+  const userPhone = await User.isUserExistsByNumber(payload?.phone);
+  if (userPhone) {
+    throw new Error('User Number already exists!');
+  }
+  // const phoneNumber = user.phone;
+  // if (user.phone) {
+  //   throw new Error('User already exists');
+  // }
   //create user
   const newUser = await User.create(payload);
 
@@ -35,9 +44,9 @@ const loginService = async (payload: TLoginUser) => {
   const userData = await User.isUserExistsByEmail(payload?.email);
  
   const jwtPayload = {
-    email: user?.email || "",
-    role: user?.role || "",
-    userId:user?._id,
+    email: user?.email ?? '',
+    role: user?.role ?? '',
+    userId: user?._id ?? '',
   };
   // create access token and send client
   const accessToken = createToken(

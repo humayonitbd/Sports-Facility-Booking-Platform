@@ -53,8 +53,8 @@ const userGetBooking = catchAsync(async (req, res) => {
 
   if (!result) {
     sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
       message: 'No Data Found!',
       data: [],
     });
@@ -74,8 +74,8 @@ const deleteBooking = catchAsync(async (req, res) => {
 
   if (!result) {
     sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
       message: 'No Data Found!',
       data: [],
     });
@@ -95,8 +95,8 @@ const AvailabilityBooking = catchAsync(async (req, res) => {
 
   if (!result) {
     sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
       message: 'No Data Found!',
       data: [],
     });

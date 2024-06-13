@@ -16,8 +16,8 @@ const createBookingService = async (
   userData: JwtPayload,
   payload: TBooking,
 ) => {
-  const bodyData = payload;
-  const { facility, startTime, endTime,date } = bodyData;
+  
+  const { facility, startTime, endTime, date } = payload;
   const { email, role, userId } = userData;
   const startDateTime = new Date(`1980-01-01T${startTime}:00`).getTime();
   const endDateTime = new Date(`1980-01-01T${endTime}:00`).getTime();
@@ -47,7 +47,6 @@ const createBookingService = async (
   }
 
 const assignedSchedules = await Booking.find({
-  user: userId,
   date: date,
 }).select('date startTime endTime');
 
@@ -74,7 +73,7 @@ if (dateTimeConflict(assignedSchedules, newSchedules)) {
 
   
   const result = await Booking.create({
-    ...bodyData,
+    ...payload,
     user: userId,
     payableAmount: payableAmount,
     isBooked: BOOKING_STATUS.confirmed,
@@ -120,6 +119,10 @@ const deleteBookingService = async (userInfo:JwtPayload,id: string) => {
     const booked = await Booking.findById(id);
     if(!booked){
          throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
+    }
+
+    if(booked?.isBooked === BOOKING_STATUS.canceled){
+         throw new AppError(httpStatus.NOT_FOUND, 'Booking is already deleted!!');
     }
 
     const userId = new ObjectId(userInfo.userId);
