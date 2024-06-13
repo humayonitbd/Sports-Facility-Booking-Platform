@@ -9,8 +9,9 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Facility } from '../facility/facility.model';
 import { User } from '../user/user.model';
 import { USER_ROLE } from '../user/user.constant';
-import { convertToISODateString, dateTimeConflict, formatDate, validateDateFormat } from './booking.utils';
+import { dateTimeConflict, formatDate, validateDateFormat } from './booking.utils';
 const { ObjectId } = require('mongoose').Types;
+// import moment from 'moment';
 
 const createBookingService = async (
   userData: JwtPayload,
@@ -21,7 +22,9 @@ const createBookingService = async (
   const { email, role, userId } = userData;
   const startDateTime = new Date(`1980-01-01T${startTime}:00`).getTime();
   const endDateTime = new Date(`1980-01-01T${endTime}:00`).getTime();
-
+  if (!validateDateFormat(date)) {
+    throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
+  }
   const facilityData = await Facility.isFacilityExistsByid(facility.toString());
 
   if (!facilityData) {
@@ -148,27 +151,30 @@ const availabilityBookingService = async (dateData: string) => {
 const currentDate = new Date();
 const updateDate = formatDate(currentDate);
 const queryDate = dateData ? dateData : updateDate;
-
 if (!validateDateFormat(queryDate)) {
-  throw new Error('Invalid date format. Date must be in DD-MM-YYYY format.');
+  throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
 }
 
-  const dateInfo = convertToISODateString(queryDate);
-  const availableSlotsDate = await Booking.find({ date: dateInfo });
+  const availableSlotsDate = await Booking.find({ date: queryDate });
   const bookedTimeSlots = availableSlotsDate.map((data) => ({
     startTime: data.startTime,
     endTime: data.endTime,
   }));
 
-
   // initialtime here
-  const availableStartTime = '00:00';
-  const availableEndTime = '23:59';
+  let availableStartTime = '00:00';
+  let availableEndTime = '24:00';
 
-  // Initialize available time slots here 
-  let availableSlots: { startTime: string; endTime: string }[] = [
-    { startTime: availableStartTime, endTime: availableEndTime },
-  ];
+  if (bookedTimeSlots.length === 0){
+    availableStartTime = '00:00';
+     availableEndTime = '23:59';
+  }
+
+  console.log('bookedTimeSlots', bookedTimeSlots);
+    // Initialize available time slots here
+    let availableSlots: { startTime: string; endTime: string }[] = [
+      { startTime: availableStartTime, endTime: availableEndTime },
+    ];
 
   // Function to convert time string to minutes
   const timeToMinutes = (time: string): number => {
@@ -208,7 +214,9 @@ if (!validateDateFormat(queryDate)) {
   }
 
   return availableSlots;
+
 };
+
 
 export const BookingServices = {
   createBookingService,

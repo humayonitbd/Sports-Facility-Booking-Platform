@@ -3,26 +3,18 @@ import { TSchedule } from './booking.interface';
 
 // validdate check here 
 export const validateDateFormat = (dateString:any) => {
-  const parsedDate = parse(dateString, 'dd-MM-yyyy', new Date());
+  const parsedDate = parse(dateString, 'yyyy-MM-dd', new Date());
   return isValid(parsedDate);
-};
-
-// Convert to YYYY-MM-DD format
-export const convertToISODateString = (dateString: string) => {
-  const [day, month, year] = dateString.split('-').map(Number);
-  const date = new Date(year, month-1 , day+1);
-  return date.toISOString().split('T')[0]; 
 };
 
 
 export const formatDate = (dateTime: Date): string => {
   const date = new Date(dateTime);
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   // Format the date as DD-MM-YYYY
-  const formattedDate = `${day}-${month}-${year}`;
-
+  const formattedDate = `${year}-${month}-${day}`;
   return formattedDate;
 };
 
