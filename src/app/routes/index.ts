@@ -12,7 +12,7 @@ const moduleRoutes = [
     route: AuthRoutes,
   },
   {
-    path: '',
+    path: '/facility',
     route: FacilityRoutes,
   },
   {

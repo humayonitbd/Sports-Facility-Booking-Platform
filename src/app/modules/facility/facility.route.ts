@@ -8,23 +8,20 @@ import { USER_ROLE } from '../user/user.constant';
 const router = express.Router();
 
 router.post(
-  '/facility',
+  '',
   AuthValidation(USER_ROLE.admin),
   validateRequest(FacilityValidation.createFacilitySchema),
   FacilityControllers.createFacility,
 );
-router.get(
-  '/facilities',
-  FacilityControllers.getAllFacility,
-);
+router.get('', FacilityControllers.getAllFacility);
 router.put(
-  '/facility/:id',
+  '/:id',
   AuthValidation(USER_ROLE.admin),
   validateRequest(FacilityValidation.updateFacilitySchema),
   FacilityControllers.updateFacility,
 );
 router.delete(
-  '/facility/:id',
+  '/:id',
   AuthValidation(USER_ROLE.admin),
   FacilityControllers.deleteFacility,
 );
