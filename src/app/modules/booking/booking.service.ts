@@ -57,6 +57,7 @@ const createBookingService = async (
     session.startTransaction();
 
     const assignedSchedules = await Booking.find({
+      facility: facility,
       date: date,
       isBooked: BOOKING_STATUS.confirmed,
     })
