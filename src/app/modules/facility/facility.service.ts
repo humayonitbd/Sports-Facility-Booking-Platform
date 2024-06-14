@@ -14,7 +14,10 @@ const createFacilityService = async (payload: TFacility) => {
   return result;
 };
 const getAllFacilityService = async (query: Record<string, unknown>) => {
-  const facultyQuery = new QueryBuilder(Facility.find(), query)
+  const facultyQuery = new QueryBuilder(
+    Facility.find({ isDeleted: false }),
+    query,
+  )
     .search(facilitySearchableFields)
     .filter()
     .sort()

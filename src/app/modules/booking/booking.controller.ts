@@ -26,7 +26,7 @@ const createBooking = catchAsync(async (req, res) => {
 const getAllBooking = catchAsync(async (req, res) => {
   const result = await BookingServices.getAllBookingService(req.query);
 
-  if (!result) {
+  if (!result || result.length === 0) {
     sendResponse(res, {
       success: false,
       statusCode: httpStatus.NOT_FOUND,
@@ -46,7 +46,7 @@ const getAllBooking = catchAsync(async (req, res) => {
 const userGetBooking = catchAsync(async (req, res) => {
   const result = await BookingServices.userGetBookingService(req.user);
 
-  if (!result) {
+  if (!result || result.length === 0) {
     sendResponse(res, {
       success: false,
       statusCode: httpStatus.NOT_FOUND,
@@ -79,7 +79,7 @@ const deleteBooking = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Booking deleted successfully',
+    message: 'Booking cancelled successfully',
     data: result,
   });
 });

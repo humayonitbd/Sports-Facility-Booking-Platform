@@ -26,7 +26,7 @@ const createFacility = catchAsync(async (req, res) => {
 const getAllFacility = catchAsync(async (req, res) => {
   const result = await FacilityServices.getAllFacilityService(req.query);
 
-  if (!result) {
+  if (!result || result.length === 0) {
     sendResponse(res, {
       success: false,
       statusCode: httpStatus.NOT_FOUND,

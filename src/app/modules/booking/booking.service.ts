@@ -123,7 +123,7 @@ const deleteBookingService = async (userInfo: JwtPayload, id: string) => {
   }
 
   if (booked?.isBooked === BOOKING_STATUS.canceled) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Booking is already deleted!!');
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking is already canceled!!');
   }
 
   const userId = new Types.ObjectId(userInfo.userId);

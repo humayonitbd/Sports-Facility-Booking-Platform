@@ -61,4 +61,6 @@ The Facility Booking System is a TypeScript-based web application built on Expre
 3. Environment Variables: .env file create 
 4. Run the application: npm start
 
-## Project Live Link: 
+## Project Live Link: https://sports-facility-assinment3.vercel.app/
+
+## Project overview video link: https://drive.google.com/file/d/1Z2SXvMcJFctSRyt1SHkECsfE4vJqC1eC/view?usp=sharing

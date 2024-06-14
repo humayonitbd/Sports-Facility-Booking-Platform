@@ -19,10 +19,7 @@ const signupService = async (payload: TUser): Promise<any> => {
   if (userPhone) {
     throw new Error('User Number already exists!');
   }
-  // const phoneNumber = user.phone;
-  // if (user.phone) {
-  //   throw new Error('User already exists');
-  // }
+
   //create user
   const newUser = await User.create(payload);
 
