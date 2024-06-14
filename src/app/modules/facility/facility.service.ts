@@ -20,7 +20,7 @@ const createFacilityService = async (payload: TFacility) => {
 
     await session.commitTransaction();
     await session.endSession();
-    return result;
+    return result[0];
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();

@@ -25,9 +25,10 @@ const signupService = async (payload: TUser): Promise<any> => {
     session.startTransaction();
     //create user
     const newUser = await User.create([payload], { session });
+    console.log('newUser', newUser);
     await session.commitTransaction();
     await session.endSession();
-    return newUser;
+    return newUser[0];
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
