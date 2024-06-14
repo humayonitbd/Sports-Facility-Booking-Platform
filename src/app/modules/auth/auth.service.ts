@@ -6,6 +6,7 @@ import config from '../../config';
 import { AppError } from '../../error/AppError';
 import httpStatus from 'http-status';
 import { createToken } from './auth.utils';
+import mongoose from 'mongoose';
 
 const signupService = async (payload: TUser): Promise<any> => {
   //user existence check
@@ -19,11 +20,19 @@ const signupService = async (payload: TUser): Promise<any> => {
   if (userPhone) {
     throw new Error('User Number already exists!');
   }
-
-  //create user
-  const newUser = await User.create(payload);
-
-  return newUser;
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    //create user
+    const newUser = await User.create([payload], { session });
+    await session.commitTransaction();
+    await session.endSession();
+    return newUser;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
+  }
 };
 
 const loginService = async (payload: TLoginUser) => {

@@ -13,7 +13,7 @@ import {
   formatDate,
   validateDateFormat,
 } from './booking.utils';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 const createBookingService = async (
   userData: JwtPayload,
@@ -26,6 +26,7 @@ const createBookingService = async (
   if (!validateDateFormat(date)) {
     throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
   }
+
   const facilityData = await Facility.isFacilityExistsByid(facility.toString());
 
   if (!facilityData) {
@@ -50,43 +51,66 @@ const createBookingService = async (
     throw new AppError(httpStatus.NOT_FOUND, 'You are not User!!');
   }
 
-  const assignedSchedules = await Booking.find({
-    date: date,
-  }).select('date startTime endTime');
+  const session = await mongoose.startSession();
 
-  const newSchedules = {
-    startTime,
-    endTime,
-    date,
-  };
+  try {
+    session.startTransaction();
 
-  if (dateTimeConflict(assignedSchedules, newSchedules)) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      `This facility is not available at that time ! Choose other time or day`,
+    const assignedSchedules = await Booking.find({
+      date: date,
+      isBooked: BOOKING_STATUS.confirmed,
+    })
+      .select('date startTime endTime')
+      .session(session);
+
+    const newSchedules = {
+      startTime,
+      endTime,
+      date,
+    };
+
+    if (dateTimeConflict(assignedSchedules, newSchedules)) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        `This facility is not available at that time ! Choose other time or day`,
+      );
+    }
+
+    // Calculate the duration in hours
+    const durationInMilliseconds = endDateTime - startDateTime;
+    const durationInHours = durationInMilliseconds / (1000 * 60 * 60);
+
+    // Calculate the payable amount
+    const payableAmount = durationInHours * Number(facilityData.pricePerHour);
+
+    const result = await Booking.create(
+      [
+        {
+          ...payload,
+          user: userId,
+          payableAmount: payableAmount,
+          isBooked: BOOKING_STATUS.confirmed,
+        },
+      ],
+      { session },
     );
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return result;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
   }
-
-  // Calculate the duration in hours
-  const durationInMilliseconds = endDateTime - startDateTime;
-  const durationInHours = durationInMilliseconds / (1000 * 60 * 60);
-
-  // Calculate the payable amount
-  const payableAmount = durationInHours * Number(facilityData.pricePerHour);
-
-  const result = await Booking.create({
-    ...payload,
-    user: userId,
-    payableAmount: payableAmount,
-    isBooked: BOOKING_STATUS.confirmed,
-  });
-
-  return result;
 };
 
 const getAllBookingService = async (query: Record<string, unknown>) => {
   const facultyQuery = new QueryBuilder(
-    Booking.find().populate('facility').populate('user'),
+    Booking.find({ isBooked: BOOKING_STATUS.confirmed })
+      .populate('facility')
+      .populate('user'),
     query,
   )
     .search(bookingSearchableFields)
@@ -109,108 +133,156 @@ const userGetBookingService = async (userInfo: JwtPayload) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
   }
 
-  const result = await Booking.find({ user: userInfo?.userId }).populate(
-    'facility',
-  );
+  const session = await mongoose.startSession();
 
-  return result;
+  try {
+    session.startTransaction();
+
+    const result = await Booking.find({
+      user: userInfo?.userId,
+      isBooked: BOOKING_STATUS.confirmed,
+    })
+      .populate('facility')
+      .session(session);
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return result;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
+  }
 };
 
 const deleteBookingService = async (userInfo: JwtPayload, id: string) => {
-  const booked = await Booking.findById(id);
-  if (!booked) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
-  }
+  const session = await mongoose.startSession();
 
-  if (booked?.isBooked === BOOKING_STATUS.canceled) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Booking is already canceled!!');
-  }
+  try {
+    session.startTransaction();
 
-  const userId = new Types.ObjectId(userInfo.userId);
-  const bookedUserId = new Types.ObjectId(booked.user);
+    const booked = await Booking.findById(id).session(session);
+    if (!booked) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
+    }
 
-  if (!userId.equals(bookedUserId)) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!!');
-  }
+    if (booked?.isBooked === BOOKING_STATUS.canceled) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Booking is already canceled!!');
+    }
 
-  const deletedBooking = await Booking.findByIdAndUpdate(
-    id,
-    { isBooked: BOOKING_STATUS.canceled },
-    { new: true },
-  ).populate('facility');
-  if (!deletedBooking) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted Booking!!');
+    const userId = new Types.ObjectId(userInfo.userId);
+    const bookedUserId = new Types.ObjectId(booked.user);
+
+    if (!userId.equals(bookedUserId)) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!!');
+    }
+
+    const deletedBooking = await Booking.findByIdAndUpdate(
+      id,
+      { isBooked: BOOKING_STATUS.canceled },
+      { new: true },
+    )
+      .populate('facility')
+      .session(session);
+    if (!deletedBooking) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted Booking!!');
+    }
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return deletedBooking;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
   }
-  return deletedBooking;
 };
 
 const availabilityBookingService = async (dateData: string) => {
-  const currentDate = new Date();
-  const updateDate = formatDate(currentDate);
-  const queryDate = dateData ? dateData : updateDate;
-  if (!validateDateFormat(queryDate)) {
-    throw new Error('Invalid date format. Date must be in YYYY-MM-dd format.');
-  }
+  const session = await mongoose.startSession();
 
-  const availableSlotsDate = await Booking.find({ date: queryDate });
-  const bookedTimeSlots = availableSlotsDate.map((data) => ({
-    startTime: data.startTime,
-    endTime: data.endTime,
-  }));
+  try {
+    session.startTransaction();
 
-  // initialtime here
-  let availableStartTime = '00:00';
-  let availableEndTime = '24:00';
+    const currentDate = new Date();
+    const updateDate = formatDate(currentDate);
+    const queryDate = dateData ? dateData : updateDate;
+    if (!validateDateFormat(queryDate)) {
+      throw new Error(
+        'Invalid date format. Date must be in YYYY-MM-dd format.',
+      );
+    }
 
-  if (bookedTimeSlots.length === 0) {
-    availableStartTime = '00:00';
-    availableEndTime = '23:59';
-  }
+    const availableSlotsDate = await Booking.find({
+      date: queryDate,
+      isBooked: BOOKING_STATUS.confirmed,
+    }).session(session);
+    const bookedTimeSlots = availableSlotsDate.map((data) => ({
+      startTime: data.startTime,
+      endTime: data.endTime,
+    }));
 
-  console.log('bookedTimeSlots', bookedTimeSlots);
-  // Initialize available time slots here
-  let availableSlots: { startTime: string; endTime: string }[] = [
-    { startTime: availableStartTime, endTime: availableEndTime },
-  ];
+    let availableStartTime = '00:00';
+    let availableEndTime = '24:00';
 
-  // Function to convert time string to minutes
-  const timeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
+    if (bookedTimeSlots.length === 0) {
+      availableStartTime = '00:00';
+      availableEndTime = '23:59';
+    }
 
-  // Filter out booked time slots from available time slots
-  for (const booking of bookedTimeSlots) {
-    availableSlots = availableSlots.reduce(
-      (result, slot) => {
-        const slotStartMinutes = timeToMinutes(slot.startTime);
-        const slotEndMinutes = timeToMinutes(slot.endTime);
-        const bookingStartMinutes = timeToMinutes(booking.startTime);
-        const bookingEndMinutes = timeToMinutes(booking.endTime);
-        // Check if booking overlaps with slot
-        if (
-          bookingStartMinutes < slotEndMinutes &&
-          bookingEndMinutes > slotStartMinutes
-        ) {
-          if (slotStartMinutes < bookingStartMinutes) {
-            result.push({
-              startTime: slot.startTime,
-              endTime: booking.startTime,
-            });
+    let availableSlots: { startTime: string; endTime: string }[] = [
+      { startTime: availableStartTime, endTime: availableEndTime },
+    ];
+
+    const timeToMinutes = (time: string): number => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    for (const booking of bookedTimeSlots) {
+      availableSlots = availableSlots.reduce(
+        (result, slot) => {
+          const slotStartMinutes = timeToMinutes(slot.startTime);
+          const slotEndMinutes = timeToMinutes(slot.endTime);
+          const bookingStartMinutes = timeToMinutes(booking.startTime);
+          const bookingEndMinutes = timeToMinutes(booking.endTime);
+
+          if (
+            bookingStartMinutes < slotEndMinutes &&
+            bookingEndMinutes > slotStartMinutes
+          ) {
+            if (slotStartMinutes < bookingStartMinutes) {
+              result.push({
+                startTime: slot.startTime,
+                endTime: booking.startTime,
+              });
+            }
+            if (slotEndMinutes > bookingEndMinutes) {
+              result.push({
+                startTime: booking.endTime,
+                endTime: slot.endTime,
+              });
+            }
+          } else {
+            result.push(slot);
           }
-          if (slotEndMinutes > bookingEndMinutes) {
-            result.push({ startTime: booking.endTime, endTime: slot.endTime });
-          }
-        } else {
-          result.push(slot);
-        }
-        return result;
-      },
-      [] as { startTime: string; endTime: string }[],
-    );
-  }
+          return result;
+        },
+        [] as { startTime: string; endTime: string }[],
+      );
+    }
 
-  return availableSlots;
+    await session.commitTransaction();
+    await session.endSession();
+
+    return availableSlots;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error.message);
+  }
 };
 
 export const BookingServices = {
