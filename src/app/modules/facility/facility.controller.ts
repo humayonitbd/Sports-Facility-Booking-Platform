@@ -26,7 +26,7 @@ const createFacility = catchAsync(async (req, res) => {
 const getAllFacility = catchAsync(async (req, res) => {
   const result = await FacilityServices.getAllFacilityService(req.query);
 
-  if (!result || result.length === 0) {
+  if (!result) {
     sendResponse(res, {
       success: false,
       statusCode: httpStatus.NOT_FOUND,
@@ -39,6 +39,27 @@ const getAllFacility = catchAsync(async (req, res) => {
     success: true,
     statusCode: httpStatus.OK,
     message: 'Facilities retrieved successfully',
+    meta: result.meta,
+    data: result.result,
+  });
+});
+
+const getSingleFacility = catchAsync(async (req, res) => {
+  const result = await FacilityServices.singleFacilityService(req.params.id);
+
+  if (!result) {
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: 'No Data Found!',
+      data: [],
+    });
+  }
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Single Facility retrieved successfully',
     data: result,
   });
 });
@@ -90,4 +111,5 @@ export const FacilityControllers = {
   getAllFacility,
   updateFacility,
   deleteFacility,
+  getSingleFacility,
 };

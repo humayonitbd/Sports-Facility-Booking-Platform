@@ -36,6 +36,20 @@ const bookingSchema = new Schema<TBooking>(
       enum: Object.keys(BOOKING_STATUS),
       default: BOOKING_STATUS.unconfirmed,
     },
+    status: {
+      type: String,
+      enum: ['Pending', 'Paid', 'Shipped', 'Completed', 'Cancelled'],
+      default: 'Pending',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['Pending', 'Paid', 'Failed'],
+      default: 'Pending',
+    },
+    transactionId: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

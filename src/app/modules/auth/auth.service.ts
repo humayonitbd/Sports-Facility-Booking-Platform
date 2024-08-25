@@ -5,8 +5,9 @@ import { TLoginUser } from './auth.interface';
 import config from '../../config';
 import { AppError } from '../../error/AppError';
 import httpStatus from 'http-status';
-import { createToken } from './auth.utils';
+import { createToken, verifyToken } from './auth.utils';
 import mongoose from 'mongoose';
+import { JwtPayload } from 'jsonwebtoken';
 
 const signupService = async (payload: TUser): Promise<any> => {
   //user existence check
@@ -77,7 +78,69 @@ const loginService = async (payload: TLoginUser) => {
   };
 };
 
+const refreshTokenService = async (token: string) => {
+  console.log("token",token)
+  if (!token) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'You are not provided refresh token !!',
+    );
+  }
+
+  // check if the token is valid
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string);
+  //   const {userId,role} = decoded;
+  const { userId, iat } = decoded;
+
+  const user = await User.isUserExistsByid(userId);
+  // checking if the user is exist
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !!');
+  }
+
+  
+
+  // console.log('requiredRoles', requiredRoles, 'role',role);
+
+  if (
+    user?.passwordChangeAt &&
+    User.isJwtIssuedBeforePasswordChanged(user.passwordChangeAt, iat as number)
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!!!!');
+  }
+
+  const jwtPayload = {
+    userId: user?._id ?? '',
+    role: user?.role ?? ' ',
+    email: user?.email ?? '',
+  };
+  // create access token and send client
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  console.log(accessToken, 'accessToken');
+
+  return {
+    accessToken,
+  };
+};
+
+const userGetService = async(payload:string)=>{
+// console.log('payload', payload)
+  const user = await User.findById(payload);
+  if(!user){
+    throw new AppError(404, "User not found!")
+  }
+
+  return user;
+
+}
 export const AuthServices = {
   signupService,
   loginService,
+  refreshTokenService,
+  userGetService,
 };

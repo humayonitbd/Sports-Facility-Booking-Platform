@@ -13,6 +13,7 @@ export const createUserSchema = z.object({
     phone: z.string().min(1, 'Phone is required'),
     role: z.nativeEnum(USER_ROLE).default(USER_ROLE.user).optional(),
     address: z.string().min(1, 'Address is required'),
+    profileImg: z.string().min(1, 'Profile image is required'),
   }),
 });
 

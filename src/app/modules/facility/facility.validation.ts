@@ -8,6 +8,7 @@ export const createFacilitySchema = z.object({
       .number()
       .min(0, 'Price per hour must be a non-negative number'),
     location: z.string().min(1, 'Location is required'),
+    image: z.string().min(1, 'Image is required'),
     isDeleted: z.boolean().optional(),
   }),
 });
@@ -21,6 +22,7 @@ export const updateFacilitySchema = z.object({
       .min(0, 'Price per hour must be a non-negative number')
       .optional(),
     location: z.string().min(1, 'Location is required').optional(),
+    image: z.string().min(1, 'Image is required').optional(),
     isDeleted: z.boolean().optional().optional(),
   }),
 });

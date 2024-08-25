@@ -38,8 +38,39 @@ const getAllFacilityService = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const result = await facultyQuery.modelQuery;
-  return result;
+    const result = await facultyQuery.modelQuery;
+    const meta = await facultyQuery.countTotal();
+    return { meta, result };
+  
+};
+
+const singleFacilityService = async (
+ payload:string
+) => {
+  const facility = await Facility.isFacilityExistsByid(payload);
+
+  if (!facility) {
+    throw new AppError(httpStatus.NOT_FOUND, 'facility is not found!!');
+  }
+
+  if (facility.isDeleted === true) {
+    throw new AppError(httpStatus.NOT_FOUND, 'facility is not found!!!');
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+    const result = await Facility.findById( payload);
+
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error.message);
+  }
 };
 
 const updateFacilityService = async (
@@ -115,4 +146,5 @@ export const FacilityServices = {
   getAllFacilityService,
   updateFacilityService,
   deleteFacilityService,
+  singleFacilityService,
 };

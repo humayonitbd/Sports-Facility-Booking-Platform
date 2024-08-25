@@ -14,6 +14,7 @@ router.post(
   FacilityControllers.createFacility,
 );
 router.get('', FacilityControllers.getAllFacility);
+router.get('/:id', FacilityControllers.getSingleFacility);
 router.put(
   '/:id',
   AuthValidation(USER_ROLE.admin),

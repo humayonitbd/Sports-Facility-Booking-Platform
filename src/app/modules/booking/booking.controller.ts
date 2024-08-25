@@ -26,7 +26,7 @@ const createBooking = catchAsync(async (req, res) => {
 const getAllBooking = catchAsync(async (req, res) => {
   const result = await BookingServices.getAllBookingService(req.query);
 
-  if (!result || result.length === 0) {
+  if (!result) {
     sendResponse(res, {
       success: false,
       statusCode: httpStatus.NOT_FOUND,
@@ -39,7 +39,8 @@ const getAllBooking = catchAsync(async (req, res) => {
     success: true,
     statusCode: httpStatus.OK,
     message: 'Facilities retrieved successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
@@ -86,7 +87,11 @@ const deleteBooking = catchAsync(async (req, res) => {
 
 const AvailabilityBooking = catchAsync(async (req, res) => {
   const date = req.query.date as string;
-  const result = await BookingServices.availabilityBookingService(date);
+  const facilityId = req.query.facility as string;
+  const result = await BookingServices.availabilityBookingService(
+    date,
+    facilityId,
+  );
 
   if (!result) {
     sendResponse(res, {

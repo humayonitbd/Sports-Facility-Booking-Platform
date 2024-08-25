@@ -5,6 +5,9 @@ import { User } from '../modules/user/user.model';
 import catchAsync from '../utils/catchAsync';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { AuthError } from '../error/AuthError';
+import httpStatus from 'http-status';
+import { verifyToken } from '../modules/auth/auth.utils';
+import { AppError } from '../error/AppError';
 
 export const AuthValidation = (
   ...requiredRoles: (keyof typeof USER_ROLE)[]
@@ -16,12 +19,15 @@ export const AuthValidation = (
       return res.status(401).json(AuthError());
     }
     const accessToken = authHeader.split(' ')[1];
-    const verfiedToken = jwt.verify(
-      accessToken as string,
-      config.jwt_access_secret as string,
-    );
+     let decoded;
+     try {
+       decoded = verifyToken(accessToken, config.jwt_access_secret as string);
+     } catch (error) {
+       throw new AppError(httpStatus.UNAUTHORIZED, 'You are Unauthorized!!');
+     }
+   
 
-    const { role, email, userId } = verfiedToken as JwtPayload;
+    const { role, email, userId } = decoded as JwtPayload;
     console.log('userId', userId, 'role', role, 'email', email);
 
     const userExist = await User.isUserExistsByEmail(email);
@@ -43,7 +49,7 @@ export const AuthValidation = (
       return res.status(401).json(AuthError());
     }
 
-    req.user = verfiedToken as JwtPayload;
+    req.user = decoded as JwtPayload;
     next();
   });
 };

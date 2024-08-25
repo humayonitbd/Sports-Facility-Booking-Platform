@@ -2,12 +2,15 @@ import { Model } from 'mongoose';
 import { USER_ROLE } from './user.constant';
 
 export type TUser = {
+  _id:string;
   name: string;
   email: string;
   password: string;
   phone: string;
+  passwordChangeAt?: Date;
   role?: keyof typeof USER_ROLE;
   address: string;
+  profileImg: string;
 };
 
 export interface UserModel extends Model<TUser> {
@@ -18,4 +21,8 @@ export interface UserModel extends Model<TUser> {
     plainTextPassword: string,
     hashedPassword: string,
   ): Promise<boolean>;
+  isJwtIssuedBeforePasswordChanged(
+    passwordChangedTimeStamp: Date,
+    jwtIssuedTimestamp: number,
+  ): boolean;
 }

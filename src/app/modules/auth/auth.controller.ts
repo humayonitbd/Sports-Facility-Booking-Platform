@@ -6,6 +6,7 @@ import { AuthServices } from './auth.service';
 import { sendLoginResponse } from './auth.utils';
 
 const signupUser = catchAsync(async (req, res) => {
+  // console.log("controller user",req.body)
   const result = await AuthServices.signupService(req.body);
 
   if (!result) {
@@ -53,7 +54,36 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+const refreshTokenController = catchAsync(async (req, res) => {
+  console.log('hit hoise ')
+  const { refreshToken } = req.cookies;
+  console.log('refreshToken', refreshToken);
+  const result = await AuthServices.refreshTokenService(refreshToken);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Refresh token access successfully!',
+    data: result,
+  });
+});
+
+const userGet = catchAsync(async (req, res) => {
+  const user = req.params.id;
+  console.log('user',user)
+  const result = await AuthServices.userGetService(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'User get successfully!',
+    data: result,
+  });
+});
+
 export const authControllers = {
   signupUser,
   loginUser,
+  refreshTokenController,
+  userGet,
 };

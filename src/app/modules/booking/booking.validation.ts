@@ -88,6 +88,11 @@ export const createBookingSchema = z.object({
           'Start time should be before End time. Format must be "HH:MM"!',
       },
     ),
+  status: z
+    .enum(['Pending', 'Paid', 'Shipped', 'Completed', 'Cancelled'])
+    .optional(), // Ensuring status is one of the predefined values
+  paymentStatus: z.enum(['Pending', 'Paid', 'Failed']).optional(), // Ensuring paymentStatus is one of the predefined values
+  transactionId: z.string().min(0, 'Transaction ID is required' ).optional(),
 });
 
 export const BookingValidation = {

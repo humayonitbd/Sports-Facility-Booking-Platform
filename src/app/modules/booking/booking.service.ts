@@ -14,6 +14,7 @@ import {
   validateDateFormat,
 } from './booking.utils';
 import mongoose, { Types } from 'mongoose';
+import { initiatePayment } from '../payment/paymentMethod';
 
 const createBookingService = async (
   userData: JwtPayload,
@@ -83,7 +84,7 @@ const createBookingService = async (
 
     // Calculate the payable amount
     const payableAmount = durationInHours * Number(facilityData.pricePerHour);
-
+    const transactionId = `TXN-${Date.now()}`;
     const result = await Booking.create(
       [
         {
@@ -91,15 +92,27 @@ const createBookingService = async (
           user: userId,
           payableAmount: payableAmount,
           isBooked: BOOKING_STATUS.confirmed,
+          transactionId,
         },
       ],
       { session },
     );
 
+    //payment
+    const paymentData = {
+      transactionId,
+      totalPrice:payableAmount,
+      custommerName: userById.name,
+      custommerEmail: userById.email,
+      custommerPhone: userById.phone,
+      custommerAddress: userById.address,
+    };
+    const paymentSession = await initiatePayment(paymentData);
+    // console.log(paymentSession);
     await session.commitTransaction();
     await session.endSession();
 
-    return result[0];
+    return paymentSession;
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
@@ -108,7 +121,7 @@ const createBookingService = async (
 };
 
 const getAllBookingService = async (query: Record<string, unknown>) => {
-  const facultyQuery = new QueryBuilder(
+  const bookingQuery = new QueryBuilder(
     Booking.find({ isBooked: BOOKING_STATUS.confirmed })
       .populate('facility')
       .populate('user'),
@@ -120,8 +133,9 @@ const getAllBookingService = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-  const result = await facultyQuery.modelQuery;
-  return result;
+  const result = await bookingQuery.modelQuery;
+  const meta = await bookingQuery.countTotal();
+  return { meta, result };
 };
 
 const userGetBookingService = async (userInfo: JwtPayload) => {
@@ -201,7 +215,10 @@ const deleteBookingService = async (userInfo: JwtPayload, id: string) => {
   }
 };
 
-const availabilityBookingService = async (dateData: string) => {
+const availabilityBookingService = async (
+  dateData: string,
+  facilityId: string,
+) => {
   const session = await mongoose.startSession();
 
   try {
@@ -218,6 +235,7 @@ const availabilityBookingService = async (dateData: string) => {
 
     const availableSlotsDate = await Booking.find({
       date: queryDate,
+      facility:facilityId,
       isBooked: BOOKING_STATUS.confirmed,
     }).session(session);
     const bookedTimeSlots = availableSlotsDate.map((data) => ({
