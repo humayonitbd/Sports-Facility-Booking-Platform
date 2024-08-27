@@ -70,7 +70,7 @@ const refreshTokenController = catchAsync(async (req, res) => {
 
 const userGet = catchAsync(async (req, res) => {
   const user = req.params.id;
-  console.log('user',user)
+  // console.log('user',user)
   const result = await AuthServices.userGetService(user);
 
   sendResponse(res, {
@@ -81,9 +81,32 @@ const userGet = catchAsync(async (req, res) => {
   });
 });
 
+const getAllUsers = catchAsync(async (req, res) => {
+  console.log('hit hoise')
+  const result = await AuthServices.getAllUsersService(req.query);
+
+  if (!result) {
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: 'No Data Found!',
+      data: [],
+    });
+  }
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'All Users retrieved successfully',
+    meta: result.meta,
+    data: result.result,
+  });
+});
+
 export const authControllers = {
   signupUser,
   loginUser,
   refreshTokenController,
   userGet,
+  getAllUsers,
 };

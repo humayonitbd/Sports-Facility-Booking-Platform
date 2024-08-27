@@ -4,7 +4,7 @@ import { TUser, UserModel } from './user.interface';
 import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import config from '../../config';
-import { USER_ROLE } from './user.constant';
+import { USER_ROLE, USER_STATUS } from './user.constant';
 
 const userSchema = new Schema<TUser, UserModel>(
   {
@@ -42,6 +42,11 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     passwordChangeAt: {
       type: Date,
+    },
+    status: {
+      type: String,
+      enum: ['in-progress', 'blocked'],
+      default: USER_STATUS.IN_PROGRESS
     },
   },
   {

@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { USER_ROLE } from './user.constant';
 
 export type TUser = {
-  _id:string;
+  _id: string;
   name: string;
   email: string;
   password: string;
@@ -11,6 +11,7 @@ export type TUser = {
   role?: keyof typeof USER_ROLE;
   address: string;
   profileImg: string;
+  status: 'in-progress' | 'blocked';
 };
 
 export interface UserModel extends Model<TUser> {

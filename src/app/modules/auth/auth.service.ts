@@ -8,6 +8,7 @@ import httpStatus from 'http-status';
 import { createToken, verifyToken } from './auth.utils';
 import mongoose from 'mongoose';
 import { JwtPayload } from 'jsonwebtoken';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const signupService = async (payload: TUser): Promise<any> => {
   //user existence check
@@ -138,9 +139,26 @@ const userGetService = async(payload:string)=>{
   return user;
 
 }
+
+const getAllUsersService = async (query: Record<string, unknown>) => {
+  const usersQuery = new QueryBuilder(
+    User.find({}),
+    query
+  )
+    .search(['name','email'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await usersQuery.modelQuery;
+  const meta = await usersQuery.countTotal();
+  return { meta, result };
+};
 export const AuthServices = {
   signupService,
   loginService,
   refreshTokenService,
   userGetService,
+  getAllUsersService,
 };

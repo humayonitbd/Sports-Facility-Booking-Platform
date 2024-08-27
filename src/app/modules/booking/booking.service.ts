@@ -137,6 +137,44 @@ const getAllBookingService = async (query: Record<string, unknown>) => {
   const meta = await bookingQuery.countTotal();
   return { meta, result };
 };
+const singleBookingService = async (userInfo: JwtPayload, id: string) => {
+  
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const booked = await Booking.findById(id).session(session);
+    if (!booked) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Booking is not found!!');
+    }
+
+    if (booked?.isBooked === BOOKING_STATUS.canceled) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Booking is already canceled!!');
+    }
+
+  const userData = await User.findById(userInfo?.userId).session(session);
+  if (!userData) {
+   throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
+  }
+
+    const getSingleBooking = await Booking.findById(id)
+      .populate('facility').populate('user')
+      .session(session);
+    if (!getSingleBooking) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Single Booking!!');
+    }
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return getSingleBooking;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
+  }
+};
 
 const userGetBookingService = async (userInfo: JwtPayload) => {
   const user = await User.isUserExistsByEmail(userInfo?.email);
@@ -157,7 +195,7 @@ const userGetBookingService = async (userInfo: JwtPayload) => {
       user: userInfo?.userId,
       isBooked: BOOKING_STATUS.confirmed,
     })
-      .populate('facility')
+      .populate('facility').populate('user')
       .session(session);
 
     await session.commitTransaction();
@@ -310,4 +348,5 @@ export const BookingServices = {
   userGetBookingService,
   deleteBookingService,
   availabilityBookingService,
+  singleBookingService,
 };

@@ -38,9 +38,32 @@ const getAllBooking = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Facilities retrieved successfully',
+    message: 'Bookings retrieved successfully',
     meta: result.meta,
     data: result.result,
+  });
+});
+
+const getSingleBooking = catchAsync(async (req, res) => {
+  const result = await BookingServices.singleBookingService(
+    req.user,
+    req.params.id
+  );
+
+  if (!result) {
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: 'No Data Found!',
+      data: [],
+    });
+  }
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Bookings single retrieved successfully',
+    data: result,
   });
 });
 
@@ -115,5 +138,6 @@ export const BookingControllers = {
   getAllBooking,
   userGetBooking,
   deleteBooking,
+  getSingleBooking,
   AvailabilityBooking,
 };
