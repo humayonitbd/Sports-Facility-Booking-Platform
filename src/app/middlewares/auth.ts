@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { User } from '../modules/user/user.model';
 import catchAsync from '../utils/catchAsync';
@@ -19,13 +19,12 @@ export const AuthValidation = (
       return res.status(401).json(AuthError());
     }
     const accessToken = authHeader.split(' ')[1];
-     let decoded;
-     try {
-       decoded = verifyToken(accessToken, config.jwt_access_secret as string);
-     } catch (error) {
-       throw new AppError(httpStatus.UNAUTHORIZED, 'You are Unauthorized!!');
-     }
-   
+    let decoded;
+    try {
+      decoded = verifyToken(accessToken, config.jwt_access_secret as string);
+    } catch (error) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are Unauthorized!!');
+    }
 
     const { role, email, userId } = decoded as JwtPayload;
     console.log('userId', userId, 'role', role, 'email', email);

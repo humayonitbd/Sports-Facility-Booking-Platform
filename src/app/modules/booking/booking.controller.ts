@@ -47,7 +47,7 @@ const getAllBooking = catchAsync(async (req, res) => {
 const getSingleBooking = catchAsync(async (req, res) => {
   const result = await BookingServices.singleBookingService(
     req.user,
-    req.params.id
+    req.params.id,
   );
 
   if (!result) {

@@ -46,7 +46,7 @@ const userSchema = new Schema<TUser, UserModel>(
     status: {
       type: String,
       enum: ['in-progress', 'blocked'],
-      default: USER_STATUS.IN_PROGRESS
+      default: USER_STATUS.IN_PROGRESS,
     },
   },
   {
@@ -97,6 +97,5 @@ userSchema.statics.isJwtIssuedBeforePasswordChanged = async function (
     new Date(passwordChangedTimeStamp).getTime() / 1000;
   return passwordChangedTime > jwtIssuedTimestamp;
 };
-
 
 export const User = model<TUser, UserModel>('User', userSchema);

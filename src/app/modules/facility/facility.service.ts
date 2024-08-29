@@ -38,15 +38,12 @@ const getAllFacilityService = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
-    const result = await facultyQuery.modelQuery;
-    const meta = await facultyQuery.countTotal();
-    return { meta, result };
-  
+  const result = await facultyQuery.modelQuery;
+  const meta = await facultyQuery.countTotal();
+  return { meta, result };
 };
 
-const singleFacilityService = async (
- payload:string
-) => {
+const singleFacilityService = async (payload: string) => {
   const facility = await Facility.isFacilityExistsByid(payload);
 
   if (!facility) {
@@ -61,7 +58,7 @@ const singleFacilityService = async (
 
   try {
     session.startTransaction();
-    const result = await Facility.findById( payload);
+    const result = await Facility.findById(payload);
 
     await session.commitTransaction();
     await session.endSession();

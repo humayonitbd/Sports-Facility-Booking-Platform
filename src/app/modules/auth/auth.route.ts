@@ -19,19 +19,21 @@ router.post(
   authControllers.loginUser,
 );
 
-
 router.post(
   '/refresh-token',
   validateRequest(AuthValidationSchema.refreshTokenValidationSchema),
   authControllers.refreshTokenController,
-  );
-  
-router.get('/user/:id', AuthValidation(USER_ROLE.user, USER_ROLE.admin), authControllers.userGet);
+);
+
+router.get(
+  '/user/:id',
+  AuthValidation(USER_ROLE.user, USER_ROLE.admin),
+  authControllers.userGet,
+);
 router.get(
   '/all-users',
   AuthValidation(USER_ROLE.admin),
   authControllers.getAllUsers,
 );
-
 
 export const AuthRoutes = router;

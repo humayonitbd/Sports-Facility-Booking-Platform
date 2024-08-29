@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -50,24 +50,26 @@
     <div class="confirmation-container">
       <h1 id="message"></h1>
       <p id="description"></p>
-      <button onclick="window.location.href='http://localhost:5173/'">Back to Home</button>
+      <button onclick="window.location.href='http://localhost:5173/'">
+        Back to Home
+      </button>
     </div>
 
     <script>
-      const message = `{{message}}`; 
-      const messageElement = document.getElementById("message");
-      const descriptionElement = document.getElementById("description");
+      const message = `{{message}}`;
+      const messageElement = document.getElementById('message');
+      const descriptionElement = document.getElementById('description');
 
-      if (message === "Payment Successfull!!") {
-        messageElement.style.color = "#4caf50";
+      if (message === 'Payment Successfull!!') {
+        messageElement.style.color = '#4caf50';
         messageElement.textContent = message;
         descriptionElement.textContent =
-          "Thank you for your purchase! Your payment has been processed successfully. You will receive a confirmation email shortly.";
+          'Thank you for your purchase! Your payment has been processed successfully. You will receive a confirmation email shortly.';
       } else {
-        messageElement.style.color = "#f44336";
+        messageElement.style.color = '#f44336';
         messageElement.textContent = message;
         descriptionElement.textContent =
-          "Unfortunately, your payment could not be processed. Please try again or contact support if the issue persists.";
+          'Unfortunately, your payment could not be processed. Please try again or contact support if the issue persists.';
       }
     </script>
   </body>

@@ -7,7 +7,6 @@ import { AppError } from '../../error/AppError';
 import httpStatus from 'http-status';
 import { createToken, verifyToken } from './auth.utils';
 import mongoose from 'mongoose';
-import { JwtPayload } from 'jsonwebtoken';
 import QueryBuilder from '../../builder/QueryBuilder';
 
 const signupService = async (payload: TUser): Promise<any> => {
@@ -27,7 +26,7 @@ const signupService = async (payload: TUser): Promise<any> => {
     session.startTransaction();
     //create user
     const newUser = await User.create([payload], { session });
-    console.log('newUser', newUser);
+
     await session.commitTransaction();
     await session.endSession();
     return newUser[0];
@@ -80,7 +79,6 @@ const loginService = async (payload: TLoginUser) => {
 };
 
 const refreshTokenService = async (token: string) => {
-  console.log("token",token)
   if (!token) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -98,8 +96,6 @@ const refreshTokenService = async (token: string) => {
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !!');
   }
-
-  
 
   // console.log('requiredRoles', requiredRoles, 'role',role);
 
@@ -122,30 +118,24 @@ const refreshTokenService = async (token: string) => {
     config.jwt_access_expires_in as string,
   );
 
-  console.log(accessToken, 'accessToken');
-
   return {
     accessToken,
   };
 };
 
-const userGetService = async(payload:string)=>{
-// console.log('payload', payload)
+const userGetService = async (payload: string) => {
+  // console.log('payload', payload)
   const user = await User.findById(payload);
-  if(!user){
-    throw new AppError(404, "User not found!")
+  if (!user) {
+    throw new AppError(404, 'User not found!');
   }
 
   return user;
-
-}
+};
 
 const getAllUsersService = async (query: Record<string, unknown>) => {
-  const usersQuery = new QueryBuilder(
-    User.find({}),
-    query
-  )
-    .search(['name','email'])
+  const usersQuery = new QueryBuilder(User.find({}), query)
+    .search(['name', 'email'])
     .filter()
     .sort()
     .paginate()

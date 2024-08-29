@@ -85,7 +85,7 @@ const createBookingService = async (
     // Calculate the payable amount
     const payableAmount = durationInHours * Number(facilityData.pricePerHour);
     const transactionId = `TXN-${Date.now()}`;
-    const result = await Booking.create(
+    await Booking.create(
       [
         {
           ...payload,
@@ -101,7 +101,7 @@ const createBookingService = async (
     //payment
     const paymentData = {
       transactionId,
-      totalPrice:payableAmount,
+      totalPrice: payableAmount,
       custommerName: userById.name,
       custommerEmail: userById.email,
       custommerPhone: userById.phone,
@@ -138,7 +138,6 @@ const getAllBookingService = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 const singleBookingService = async (userInfo: JwtPayload, id: string) => {
-  
   const session = await mongoose.startSession();
 
   try {
@@ -153,13 +152,14 @@ const singleBookingService = async (userInfo: JwtPayload, id: string) => {
       throw new AppError(httpStatus.NOT_FOUND, 'Booking is already canceled!!');
     }
 
-  const userData = await User.findById(userInfo?.userId).session(session);
-  if (!userData) {
-   throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
-  }
+    const userData = await User.findById(userInfo?.userId).session(session);
+    if (!userData) {
+      throw new AppError(httpStatus.NOT_FOUND, 'User is not found!!');
+    }
 
     const getSingleBooking = await Booking.findById(id)
-      .populate('facility').populate('user')
+      .populate('facility')
+      .populate('user')
       .session(session);
     if (!getSingleBooking) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Single Booking!!');
@@ -195,7 +195,8 @@ const userGetBookingService = async (userInfo: JwtPayload) => {
       user: userInfo?.userId,
       isBooked: BOOKING_STATUS.confirmed,
     })
-      .populate('facility').populate('user')
+      .populate('facility')
+      .populate('user')
       .session(session);
 
     await session.commitTransaction();
@@ -273,7 +274,7 @@ const availabilityBookingService = async (
 
     const availableSlotsDate = await Booking.find({
       date: queryDate,
-      facility:facilityId,
+      facility: facilityId,
       isBooked: BOOKING_STATUS.confirmed,
     }).session(session);
     const bookedTimeSlots = availableSlotsDate.map((data) => ({

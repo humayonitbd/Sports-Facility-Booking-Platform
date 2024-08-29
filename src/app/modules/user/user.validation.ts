@@ -14,7 +14,10 @@ export const createUserSchema = z.object({
     role: z.nativeEnum(USER_ROLE).default(USER_ROLE.user).optional(),
     address: z.string().min(1, 'Address is required'),
     profileImg: z.string().min(1, 'Profile image is required'),
-    status: z.nativeEnum(USER_STATUS).default(USER_STATUS.IN_PROGRESS).optional(),
+    status: z
+      .nativeEnum(USER_STATUS)
+      .default(USER_STATUS.IN_PROGRESS)
+      .optional(),
   }),
 });
 

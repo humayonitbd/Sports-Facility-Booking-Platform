@@ -55,7 +55,7 @@ const loginUser = catchAsync(async (req, res) => {
 });
 
 const refreshTokenController = catchAsync(async (req, res) => {
-  console.log('hit hoise ')
+  console.log('hit hoise ');
   const { refreshToken } = req.cookies;
   console.log('refreshToken', refreshToken);
   const result = await AuthServices.refreshTokenService(refreshToken);
@@ -82,7 +82,7 @@ const userGet = catchAsync(async (req, res) => {
 });
 
 const getAllUsers = catchAsync(async (req, res) => {
-  console.log('hit hoise')
+  console.log('hit hoise');
   const result = await AuthServices.getAllUsersService(req.query);
 
   if (!result) {
