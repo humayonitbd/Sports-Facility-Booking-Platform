@@ -21,7 +21,8 @@ const conformationService = async (transactionId: string, status: string) => {
     message = 'Payment Failed!!';
   }
 
-  const filePath = join(__dirname, '../../../views/conformation.payment.html');
+  const filePath = join(__dirname, '../../../../public/conformation.html');
+  console.log('filepath', filePath)
   let template = readFileSync(filePath, 'utf-8');
   template = template.replace('{{message}}', message);
 

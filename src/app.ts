@@ -4,6 +4,7 @@ import router from './app/routes';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import cookieParser from 'cookie-parser';
+import  path  from 'path';
 
 const app: Application = express();
 
@@ -18,6 +19,7 @@ app.use(
   }),
 );
 
+app.use(express.static(path.join(__dirname,'public')));
 // application route..
 app.use('/api', router);
 
