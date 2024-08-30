@@ -7,7 +7,7 @@ export const initiatePayment = async (paymentData: any) => {
       store_id: config.payment_storeId,
       signature_key: config.payment_signeture_key,
       tran_id: paymentData.transactionId,
-      success_url: `https://sports-facility-assinment3.vercel.app/api/conformation?transactionId=${paymentData.transactionId}&status=success`,
+      success_url: `https://sports-facility-assinment3.vercel.app/api/conformation?transactionId=${paymentData.transactionId}&status=Success`,
       fail_url: `https://sports-facility-assinment3.vercel.app/api/conformation?status=failed`,
       cancel_url: 'https://sports-facilities-booking-platform.netlify.app/',
       amount: paymentData.totalPrice,

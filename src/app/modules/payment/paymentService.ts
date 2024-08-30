@@ -16,7 +16,7 @@ const conformationService = async (transactionId: string, status: string) => {
         status: 'Paid',
       },
     );
-    message = 'Payment Successfull!!';
+    message = `Payment ${status}full!!`;
   } else {
     message = 'Payment Failed!!';
   }
